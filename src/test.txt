@@ -1,0 +1,32 @@
+val z = a + b
+val x = a+(b+c)
+val x = a+(a+u)
+val x = (a+b)
+val x = -6
+val x = a-(b*(c-d))
+var x = (b-a)*n
+var jOOOh = -thk[5]
+var p = funk()
+var p = funс(5+1)
+var p = funс(p)
+var p = funс(5, p)
+var p = myVar && myVar
+var p = myVar || myVar
+var p = myVar && !myVar
+var p = !myVar && myVar
+var x = !!b
+var x = a && !!b
+var x = a && !(a > 5)
+var x = !!!b
+var y = (a < 7) && b
+var y = (a && b)
+var y = !true && false
+var y = true || (false && false) && my
+var y = true || false || my
+var y = true || false || !my
+var y = (5 - 4) > 1
+
+while (x < 5) {
+    pr(x)
+    x=x-1
+}

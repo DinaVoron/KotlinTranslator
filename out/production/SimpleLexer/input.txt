@@ -1,0 +1,6 @@
+fun prin(y: Boolean, x: Char): String {
+x = x - y
+return x
+}
+
+prin(false, 't')
