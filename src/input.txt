@@ -1,6 +1,10 @@
 fun prin(y: Boolean, x: Char): String {
-x = x - y
+
 return x
 }
 
+var x = 2
+var y = x + 1
+var z
+z = 9.5
 prin(false, 't')
