@@ -1555,7 +1555,39 @@ public class Parser {
             if (exp.childrenNode.size() <= 2) {
                 switch (exp.childrenNode.get(0).name) {
                     case "value":
-                        vt.addVarType(newVar, exp.childrenNode.get(0).childrenNode.get(0).tl.getToken().toString());
+                        String val;
+                        if (exp.childrenNode.get(0).childrenNode.get(0).tl.getToken().toString() == "MINUS")
+                            val = exp.childrenNode.get(0).childrenNode.get(1).tl.getToken().toString();
+                        else val = exp.childrenNode.get(0).childrenNode.get(0).tl.getToken().toString();
+                        switch (val) {
+                            case "STR":
+                                val = "STRING";
+                                break;
+                            case "CHAR":
+                                val = "CHARTYPE";
+                                break;
+                            case "TRUE", "FALSE" :
+                                val = "BOOL";
+                                break;
+                            case "NUM":
+                                val = exp.childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString();
+                                if (val.indexOf(".") != -1) {
+                                    if (val.indexOf("f") != -1)
+                                        val = "FLOAT";
+                                    else val = "DOUBLE";
+                                    break;
+                                }
+                                else {
+                                    if (val.length() <= 2) val = "BYTE";
+                                    else
+                                        if (val.length() <= 4) val = "SHORT";
+                                        else
+                                            if (val.length() <= 9) val = "INT";
+                                            else val = "LONG";
+                                }
+
+                        }
+                        vt.addVarType(newVar, val);
                         break;
                     case "ID":
                         vt.addVarType(newVar, vt.getVarType(exp.childrenNode.get(0).tl.getLexem().toString()));
@@ -1577,6 +1609,7 @@ public class Parser {
             }
         }
     }
+
     public Node statement() throws Exception {
         ArrayList<Node> insideStatement = new ArrayList<>();
 
