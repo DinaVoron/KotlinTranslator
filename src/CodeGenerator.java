@@ -13,10 +13,11 @@ public class CodeGenerator {
                     case "statement":
                         res += statement(nodeStatement);
                         break;
-                        //res += ";";
                     case "EOL":
                         res += "\n";
                         break;
+                    case "COMMENT":
+                        res += getComment(nodeStatement);
                 }
             }
         }
@@ -846,6 +847,19 @@ public class CodeGenerator {
                 code1 += "void ";
         }
         return (code1+code);
+    }
+
+    public String getComment(Node node) {
+        String res = "";
+        char[] res_char = node.tl.lexema.toString().toCharArray();
+        for (char ch: res_char) {
+            if (ch == '®') {
+                res += "\r\n";
+            } else {
+                res += ch;
+            }
+        }
+        return res;
     }
 
 }

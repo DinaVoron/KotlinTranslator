@@ -21,9 +21,10 @@ public class Main {
             return;
         }
 
-        System.out.println(parser.getVarTypes());
+//        System.out.println(parser.getVarTypes());
         CodeGenerator cg = new CodeGenerator();
-        System.out.println(cg.generate(parser.program));
+        Optimizer opt = new Optimizer(parser.program);
+        System.out.println(cg.generate(opt.optimize()));
 
     }
 

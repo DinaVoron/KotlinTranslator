@@ -7,7 +7,6 @@ public class Parser {
 
     Lexer lexer;
 
-    //вот он наш корень дерева
     Node program;
 
     SemanticAnalyzer sa = new SemanticAnalyzer();
@@ -34,16 +33,24 @@ public class Parser {
 
                 //Идем ровно по грамматике
                 //Получили statement
-                Node expStatement = statement();
+                if (lexer.getLastToken() == Token.COMMENT) {
+                    inside.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
+                    lexer.getNextLexem();
+
+                } else {
+                    Node expStatement = statement();
 
 
-                //если не получили statement
-                if (expStatement == null) {
-                    System.out.println("Ошибка! Ожидалось выражение!");
-                    return;
+                    //если не получили statement
+                    if (expStatement == null) {
+                        System.out.println("Ошибка! Ожидалось выражение!");
+                        return;
+                    }
+
+                    inside.add(expStatement);
+
                 }
 
-                //lexer.getNextLexem();
 
                 //проверяем наличие EOL
                 Node expEOL = eol();
@@ -53,8 +60,6 @@ public class Parser {
                     System.out.println("Ошибка! Ожидался конец строки!");
                     return;
                 }
-
-                inside.add(expStatement);
 
                 inside.add(expEOL);
 
