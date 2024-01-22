@@ -322,6 +322,8 @@ public class Parser {
                         return null;
                     }
                 }
+            case ARRAYOF:
+                ///
             default:
                 return null;
         }

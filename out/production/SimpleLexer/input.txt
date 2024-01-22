@@ -1,6 +1,1 @@
-fun prin(y: Boolean, x: Char): String {
-x = x - y
-return x
-}
-
-prin(false, 't')
+var m = arrayOf(1,2,3)
