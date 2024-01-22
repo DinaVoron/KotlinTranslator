@@ -27,7 +27,6 @@ public class Node {
         childrenNode.add(n);
     }
 
-    // ТУТ НЕ РАБОТАЕТ
     // @Override
     public String toString(int t) {
         String s = "";
