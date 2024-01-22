@@ -1430,7 +1430,7 @@ public class Parser {
         lexer.getNextLexem();
         //!
         if (lexer.getLastToken() != Token.ID) {
-            System.out.println("Ошибка! Ожидался ИД!");
+            System.out.println("Ошибка! Ожидался идентификатор!");
             return null;
         }
         sa.addLevel();
@@ -1663,7 +1663,7 @@ public class Parser {
 
                 } else {
                     if (last == Token.VAL) {
-                        System.out.println("Необходимо инициализировать констатнту");
+                        System.out.println("Ошибка! Необходимо инициализировать констатнту!");
                         return null;
                     }
                     Node declaration = new Node("declaration", insideDeclaration);
@@ -1792,7 +1792,7 @@ public class Parser {
             case FOR:
                 Node expFor = forStatement();
                 if (expFor == null) {
-                    System.out.println("Ошибка! Ожидалось FOR выражение!");
+                    System.out.println("Ошибка! Ожидалось выражение!");
                     return null;
                 }
                 else {
