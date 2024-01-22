@@ -3,7 +3,7 @@ fun prin(y: Boolean, x: Char): String {
 return x
 }
 
-var x = 2
+var x = @
 var y = x + 1
 var z
 z = 9.5

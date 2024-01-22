@@ -1,1 +1,10 @@
-var m = arrayOf(1,2,3)
+fun prin(y: Boolean, x: Char): String {
+
+return x
+}
+
+var x = @
+var y = x + 1
+var z
+z = 9.5
+prin(false, 't')

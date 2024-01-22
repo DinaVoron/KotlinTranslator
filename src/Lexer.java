@@ -21,7 +21,7 @@ public class Lexer {
         }
 
         str = str.trim();
-         for (Token t : Token.values()) {
+        for (Token t : Token.values()) {
             int end = t.endOfMatch(str.toString());
             if (end != -1) {
                 token = t;
@@ -30,6 +30,7 @@ public class Lexer {
                 return true;
             }
         }
+        System.out.println("Произошла ошибка в ходе работы лексера. Неизвестный символ возле " + lexema + " ...");
         return false;
     }
 
