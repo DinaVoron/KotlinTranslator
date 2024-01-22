@@ -12,6 +12,8 @@ public class Parser {
 
     SemanticAnalyzer sa = new SemanticAnalyzer();
 
+    VarTypes vt = new VarTypes();
+
     public Parser(Lexer lexer){
         this.lexer = lexer;
     }
@@ -62,7 +64,7 @@ public class Parser {
                     expEOL = eol();
                 }
 
-               // lexer.getNextLexem();
+                // lexer.getNextLexem();
             }
             inside.add(new Node("EOF", new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
             program = new Node("program", inside);
@@ -322,8 +324,6 @@ public class Parser {
                         return null;
                     }
                 }
-            case ARRAYOF:
-                ///
             default:
                 return null;
         }
@@ -449,8 +449,8 @@ public class Parser {
                 }
                 insideLogExpression.add(expLogExp1);
                 return new Node("logical-expression", insideLogExpression);
-                //insideExpression.add(expInsExp1);
-                //return new Node("expression", insideExpression);
+            //insideExpression.add(expInsExp1);
+            //return new Node("expression", insideExpression);
         }
     }
     public Node expression_inside() throws Exception {
@@ -518,7 +518,7 @@ public class Parser {
                 Node expSign = sign();
 
                 if (expSign == null) {
-                   // System.out.println("Ошибка! Ожидался знак!");
+                    // System.out.println("Ошибка! Ожидался знак!");
                     Node expLogSign = logicalSign();
                     if (expLogSign == null) {
                         return expTerm;
@@ -860,13 +860,15 @@ public class Parser {
                     throw new Exception();
                 }
                 insideFunCall.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
-                    lexer.getNextLexem();
-                    Node expExp = expression();
-                    if (expExp == null) {
-                        System.out.println("Ошибка! Ожидалось выражение");
-                        return null;
-                    }
-                    insideFunCall.add(expExp);
+                lexer.getNextLexem();
+                Node expExp = expression();
+                if (expExp == null) {
+                    System.out.println("Ошибка! Ожидалось выражение");
+                    return null;
+                }
+                Node exp = expExp;
+                addTypes(exp,id);
+                insideFunCall.add(expExp);
                 return new Node("assigning", insideFunCall);
             default:
                 return null;
@@ -916,7 +918,7 @@ public class Parser {
             case EOL:
                 insideFunBlock.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                 lexer.getNextLexem();
-                 Node expFunBlock = function_block();
+                Node expFunBlock = function_block();
                 if (expFunBlock != null) {
                     insideFunBlock.add(expFunBlock);
                 }
@@ -1075,10 +1077,14 @@ public class Parser {
         return new Node ("params", insideParams);
     }
 
-    public void findType(Node node, ArrayList<String> par) {
+    public void findType(Node node, ArrayList<String> par, String id) {
         for (int i = 0; i < node.childrenNode.size(); i++) {
             switch(node.childrenNode.get(i).name) {
                 case "param":
+                    Vars v = new Vars(node.childrenNode.get(i).childrenNode.get(0).tl.getLexem().toString());
+                    v.type = node.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name;
+                    //System.out.println(v.name+" "+v.type+"\n");
+                    vt.addFunVar(id, v);
                     switch (node.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name) {
                         case "STRING":
                             par.add("str");
@@ -1097,7 +1103,7 @@ public class Parser {
                     }
                     break;
                 case "params":
-                    findType(node.childrenNode.get(i).childrenNode.get(0), par);
+                    findType(node.childrenNode.get(i).childrenNode.get(0), par, id);
                     break;
                 default:
                     break;
@@ -1111,6 +1117,7 @@ public class Parser {
             if (lexer.getLastToken() == Token.ID) {
                 insideFunction.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                 String id = lexer.getLastLexem().toString();
+                vt.addFun(id);
                 lexer.getNextLexem();
                 if (lexer.getLastToken() == Token.LBR) {
                     insideFunction.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
@@ -1131,19 +1138,23 @@ public class Parser {
                             lexer.getNextLexem();
                             Node type = type();
                             if (type != null) {
+                                vt.addFunType(id, type.childrenNode.get(0).tl.getLexem().toString());
                                 insideFunction.add(type);
                             } else {
                                 System.out.println("Ошибка! Ожидался тип!");
                                 return null;
                             }
                         }
-
                         ArrayList<String> par = new ArrayList<>();
                         if (expParams != null) {
                             ArrayList<Node> inUse = expParams.childrenNode;
                             for (int i = 0; i < inUse.size(); i++) {
                                 switch(inUse.get(i).name) {
                                     case "param":
+                                        Vars v = new Vars(expParams.childrenNode.get(i).childrenNode.get(0).tl.getLexem().toString());
+                                        v.type = expParams.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name;
+                                        //System.out.println(v.name+" "+v.type+"\n");
+                                        vt.addFunVar(id, v);
                                         switch (expParams.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name) {
                                             case "STRING":
                                                 par.add("str");
@@ -1162,7 +1173,7 @@ public class Parser {
                                         }
                                         break;
                                     case "params":
-                                        findType(inUse.get(i), par);
+                                        findType(inUse.get(i), par, id);
                                         break;
                                     default:
                                         break;
@@ -1234,7 +1245,7 @@ public class Parser {
         else {
             Node expValue = value();
             if (expValue == null) {
-               // System.out.println("Ошибка! Ожидалось значение!");
+                // System.out.println("Ошибка! Ожидалось значение!");
                 return null;
             }
             insSwicthBlock.add(expValue);
@@ -1282,7 +1293,7 @@ public class Parser {
         }
         Node nodeSw = switchCommand();
         if (nodeSw == null) {
-           // System.out.println("Ошибка! Ожидалась switch-command !");
+            // System.out.println("Ошибка! Ожидалась switch-command !");
             return null;
         }
         insSwicthBlock.add(nodeSw);
@@ -1353,7 +1364,7 @@ public class Parser {
             System.out.println("Ошибка! Ожидалось when!");
             return null;
         }
-       // WHEN LBR ID RBR LCBR switch-block RCBR
+        // WHEN LBR ID RBR LCBR switch-block RCBR
         return null;
     }
 
@@ -1521,6 +1532,84 @@ public class Parser {
             return null;
         }
     }
+    public void addTypes(Node exp, String newVar) {
+        if (exp.name == "expression") {
+            if (exp.childrenNode.get(0).name == "LBR") {
+                exp = exp.childrenNode.get(1);
+            }
+            if (exp.childrenNode.get(0).name == "logical-expression") {
+                vt.addVarType(newVar, "BOOL");
+            }
+            else {
+                while (exp.name != "term") {
+                    if (exp.childrenNode.get(0).name == "LBR" || exp.childrenNode.get(0).name == "sign") {
+                        exp = exp.childrenNode.get(1);
+                    }
+                    else exp = exp.childrenNode.get(0);
+                }
+            }
+        }
+        // добавляем значение переменной
+        // добавить (потом..) списки и массивы
+        if (exp.name == "term") {
+            if (exp.childrenNode.size() <= 2) {
+                switch (exp.childrenNode.get(0).name) {
+                    case "value":
+                        String val;
+                        if (exp.childrenNode.get(0).childrenNode.get(0).tl.getToken().toString() == "MINUS")
+                            val = exp.childrenNode.get(0).childrenNode.get(1).tl.getToken().toString();
+                        else val = exp.childrenNode.get(0).childrenNode.get(0).tl.getToken().toString();
+                        switch (val) {
+                            case "STR":
+                                val = "STRING";
+                                break;
+                            case "CHAR":
+                                val = "CHARTYPE";
+                                break;
+                            case "TRUE", "FALSE" :
+                                val = "BOOL";
+                                break;
+                            case "NUM":
+                                val = exp.childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString();
+                                if (val.indexOf(".") != -1) {
+                                    if (val.indexOf("f") != -1)
+                                        val = "FLOAT";
+                                    else val = "DOUBLE";
+                                    break;
+                                }
+                                else {
+                                    if (val.length() <= 2) val = "BYTE";
+                                    else
+                                    if (val.length() <= 4) val = "SHORT";
+                                    else
+                                    if (val.length() <= 9) val = "INT";
+                                    else val = "LONG";
+                                }
+
+                        }
+                        vt.addVarType(newVar, val);
+                        break;
+                    case "ID":
+                        vt.addVarType(newVar, vt.getVarType(exp.childrenNode.get(0).tl.getLexem().toString()));
+                        break;
+                    case "function-call":
+                        vt.addVarType(newVar, vt.getFunType(exp.childrenNode.get(0).tl.getLexem().toString()));
+                        break;
+                    case "MINUS":
+                        switch(exp.childrenNode.get(1).name) {
+                            case "ID":
+                                vt.addVarType(newVar, vt.getVarType(exp.childrenNode.get(1).tl.getLexem().toString()));
+                                break;
+                            case "function-call":
+                                vt.addVarType(newVar, vt.getFunType(exp.childrenNode.get(1).tl.getLexem().toString()));
+                                break;
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
     public Node statement() throws Exception {
         ArrayList<Node> insideStatement = new ArrayList<>();
 
@@ -1536,8 +1625,12 @@ public class Parser {
                     System.out.println("Ошибка! Ожидалось объявление!");
                     return null;
                 }
-                String val = lexer.getLastLexem().toString();
+                String newVar = expSimpleDeclaration.childrenNode.get(1).tl.getLexem().toString();
+                vt.addVar(newVar);
+
+                String val = lexer.getLastLexem().toString(); // здесь должен лежать знак "=" ?
                 insideDeclaration.add(expSimpleDeclaration);
+
 
                 if (lexer.getLastToken() == Token.EQUALS) {
 
@@ -1551,23 +1644,21 @@ public class Parser {
 
                     //после равно получим выражение
 
-
                     Node expExpression = expression();
                     //давайте вот тут сохранять токены для логического выражения??
 
+                    Node exp = expExpression;
+                    addTypes(exp, newVar);
 
                     if (expExpression == null) {
                         System.out.println("Ошибка! Ожидалась правая часть выражения!");
                         return null;
                     }
 
-
-
                     insideDeclaration.add(expExpression);
                     insideStatement.add(new Node("declaration", insideDeclaration));
                     //lexer.getNextLexem();
                     return new Node("statement", insideStatement);
-
 
 
                 } else {
@@ -1724,6 +1815,9 @@ public class Parser {
             }
         }
         return res;
+    }
+    public String getVarTypes(){
+        return vt.getAllTypes();
     }
     @Override
     public String toString() {
