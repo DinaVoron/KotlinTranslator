@@ -91,7 +91,7 @@ public class Parser {
     public Node id() {
         switch (lexer.getLastToken()) {
             case ID:
-                Node node =  new Node(lexer.getLastLexem().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken()));
+                Node node =  new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken()));
                 lexer.getNextLexem();
                 return node;
             default:
@@ -293,6 +293,9 @@ public class Parser {
                                                 fc.add("char");
                                                 break;
                                         }
+                                    }
+                                    else if (actualParam().childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name.equals("ID")) {
+                                        fc.add(vt.getVarType(actualParam().childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString()));
                                     }
                                 } //вот тут вот добавить про id в будущем
                             }
@@ -766,10 +769,10 @@ public class Parser {
                     lexer.getNextLexem();
 
                     ArrayList<String> fc = new ArrayList<>();
-
                     if (expActParams != null) {
                         for (int i = 0; i < expActParams.childrenNode.size(); i++) {
                             if (expActParams.childrenNode.get(i).name.equals("actual-param")) {
+                                //System.out.println(expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name);
                                 if (expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name.equals("value")) {
                                     Token param = expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).childrenNode.get(0).tl.getToken();
                                     switch (param) {
@@ -787,10 +790,14 @@ public class Parser {
                                             break;
                                     }
                                 }
+                                else if (expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name.equals("ID")) {
+                                    fc.add(vt.getVarType(expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString()));
+                                }
                             } else {
                                 if (expActParams.childrenNode.get(i).name.equals("actual-params")) {
                                     addCheckFun(expActParams.childrenNode.get(i), fc);
                                 }
+
                             }
                         }
                     }
@@ -1083,25 +1090,33 @@ public class Parser {
     }
 
     public void findType(Node node, ArrayList<String> par, String id) {
+
         for (int i = 0; i < node.childrenNode.size(); i++) {
             switch(node.childrenNode.get(i).name) {
                 case "param":
                     Vars v = new Vars(node.childrenNode.get(i).childrenNode.get(0).tl.getLexem().toString());
-                    v.type = node.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name;
-                    //System.out.println(v.name+" "+v.type+"\n");
-                    vt.addFunVar(id, v);
+                    //v.type = node.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name;
+                    //vt.addFunVar(id, v);
                     switch (node.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name) {
                         case "STRING":
                             par.add("str");
+                            v.type = "str";
+                            vt.addFunVar(id, v);
                             break;
                         case "INT", "FLOAT":
                             par.add("num");
+                            v.type = "num";
+                            vt.addFunVar(id, v);
                             break;
                         case "BOOL":
                             par.add("bool");
+                            v.type = "bool";
+                            vt.addFunVar(id, v);
                             break;
                         case "CHARTYPE":
                             par.add("char");
+                            v.type = "char";
+                            vt.addFunVar(id, v);
                             break;
                         default:
                             break;
@@ -1143,7 +1158,20 @@ public class Parser {
                             lexer.getNextLexem();
                             Node type = type();
                             if (type != null) {
-                                vt.addFunType(id, type.childrenNode.get(0).tl.getLexem().toString());
+                                switch (type.childrenNode.get(0).tl.getToken()) {
+                                    case BYTE, SHORT, INT, LONG, FLOAT, DOUBLE:
+                                        vt.addFunType(id, "num");
+                                        break;
+                                    case BOOL:
+                                        vt.addFunType(id, "bool");
+                                        break;
+                                    case CHARTYPE:
+                                        vt.addFunType(id, "char");
+                                        break;
+                                    case STRING:
+                                        vt.addFunType(id, "str");
+                                        break;
+                                }
                                 insideFunction.add(type);
                             } else {
                                 System.out.println("Ошибка! Ожидался тип!");
@@ -1157,21 +1185,29 @@ public class Parser {
                                 switch(inUse.get(i).name) {
                                     case "param":
                                         Vars v = new Vars(expParams.childrenNode.get(i).childrenNode.get(0).tl.getLexem().toString());
-                                        v.type = expParams.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name;
+                                        //v.type = expParams.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name;
                                         //System.out.println(v.name+" "+v.type+"\n");
-                                        vt.addFunVar(id, v);
+                                        //vt.addFunVar(id, v);
                                         switch (expParams.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name) {
                                             case "STRING":
                                                 par.add("str");
+                                                v.type = "str";
+                                                vt.addFunVar(id, v);
                                                 break;
                                             case "INT", "FLOAT":
                                                 par.add("num");
+                                                v.type = "num";
+                                                vt.addFunVar(id, v);
                                                 break;
                                             case "BOOL":
                                                 par.add("bool");
+                                                v.type = "bool";
+                                                vt.addFunVar(id, v);
                                                 break;
                                             case "CHARTYPE":
                                                 par.add("char");
+                                                v.type = "char";
+                                                vt.addFunVar(id, v);
                                                 break;
                                             default:
                                                 break;
@@ -1543,7 +1579,7 @@ public class Parser {
                 exp = exp.childrenNode.get(1);
             }
             if (exp.childrenNode.get(0).name == "logical-expression") {
-                vt.addVarType(newVar, "BOOL");
+                vt.addVarType(newVar, "bool");
             }
             else {
                 while (exp.name != "term") {
@@ -1566,30 +1602,31 @@ public class Parser {
                         else val = exp.childrenNode.get(0).childrenNode.get(0).tl.getToken().toString();
                         switch (val) {
                             case "STR":
-                                val = "STRING";
+                                val = "str";
                                 break;
                             case "CHAR":
-                                val = "CHARTYPE";
+                                val = "char";
                                 break;
                             case "TRUE", "FALSE" :
-                                val = "BOOL";
+                                val = "bool";
                                 break;
                             case "NUM":
-                                val = exp.childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString();
-                                if (val.indexOf(".") != -1) {
-                                    if (val.indexOf("f") != -1)
-                                        val = "FLOAT";
-                                    else val = "DOUBLE";
-                                    break;
-                                }
-                                else {
-                                    if (val.length() <= 2) val = "BYTE";
-                                    else
-                                    if (val.length() <= 4) val = "SHORT";
-                                    else
-                                    if (val.length() <= 9) val = "INT";
-                                    else val = "LONG";
-                                }
+                                val = "num";
+//                                val = exp.childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString();
+//                                if (val.indexOf(".") != -1) {
+//                                    if (val.indexOf("f") != -1)
+//                                        val = "FLOAT";
+//                                    else val = "DOUBLE";
+//                                    break;
+//                                }
+//                                else {
+//                                    if (val.length() <= 2) val = "BYTE";
+//                                    else
+//                                    if (val.length() <= 4) val = "SHORT";
+//                                    else
+//                                    if (val.length() <= 9) val = "INT";
+//                                    else val = "LONG";
+//                                }
 
                         }
                         vt.addVarType(newVar, val);
