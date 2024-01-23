@@ -30,7 +30,10 @@ public class Parser {
             while (lexer.getLastToken() != Token.EOF) {
                 //Token t = lexer.getLastToken();
                 //Lexem l = lexer.getLastLexem();
-
+                while(lexer.getLastToken() == Token.EOL) {
+                    inside.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
+                    lexer.getNextLexem();
+                }
                 //Идем ровно по грамматике
                 //Получили statement
                 if (lexer.getLastToken() == Token.COMMENT) {
@@ -415,6 +418,8 @@ public class Parser {
                 if (lexer.getLastToken() == Token.RBR) {
                     insideLogExpression.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                     lexer.getNextLexem();
+                    Node expLogExp_ = logicalExpression_();
+                    if (expLogExp_ != null) insideLogExpression.add(expLogExp_);
                     return new Node("logical-expression", insideLogExpression);
                 } else {
                     System.out.println("Ошибка! Ожидалась правая скобка!");
@@ -493,10 +498,13 @@ public class Parser {
                         return null;
                     }
                     else {
+                        //lexer.getNextLexem();
                         Node expExpInside_1 = expressionInside_();
                         if (expExpInside_1 == null) {
                             insideExpressionInside.add(new Node("RBR", new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                             lexer.getNextLexem();
+                            Node expExpInside_2 = expressionInside_();
+                            if (expExpInside_2 != null) insideExpressionInside.add(expExpInside_2);
                             return new Node("expression-inside", insideExpressionInside);
                         }
                         else {
@@ -673,7 +681,16 @@ public class Parser {
                 } else {
                     Node expTerm = term();
                     if (expTerm == null) {
-                        System.out.println("Ошибка! Ожидался терм!");
+                        Node expLogicalExpression = logicalExpression();
+                        if (expLogicalExpression == null) {
+                            System.out.println("Ошибка! Ожидался терм!");
+                        } else {
+                            insideExpression.add(expLogicalExpression);
+                            Node logNode = new Node("logical-expression", insideExpression);
+                            ArrayList<Node> newInsideExpression = new ArrayList<>();
+                            newInsideExpression.add(logNode);
+                            return new Node("expression", newInsideExpression);
+                        }
                     }
                     insideExpression.add(expTerm);
                     Node expLogExp_ = logicalExpression_();
@@ -689,6 +706,11 @@ public class Parser {
                     arrL.add(logExp);
                     return new Node("expression", arrL);
                 }
+            case ARRAYOF:
+                Node expFun = function_call();
+                ArrayList<Node> expInside = new ArrayList<>();
+                expInside.add(expFun);
+                return(new Node("expression", expInside));
             default:
                 Node expInsExp1 = expression_inside();
 
@@ -750,6 +772,10 @@ public class Parser {
                 id = lexer.getLastLexem().toString();
                 insideFunCall.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                 break;
+            case ARRAYOF:
+                id = "ARRAYOF";
+                insideFunCall.add(new Node("ARRAYOF", new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
+                break;
             default:
                 insideFunCall.add(new Node("ID", new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                 break;
@@ -802,12 +828,17 @@ public class Parser {
                         }
                     }
 
-                    if (!sa.checkFun(id, fc)) {
-                        System.out.println("Ошибка! Функция вызвана не с теми параметрами!");
-                        return null;
+                    if (id != "ARRAYOF") {
+                        if (!sa.checkFun(id, fc)) {
+                            System.out.println("Ошибка! Функция вызвана не с теми параметрами!");
+                            return null;
+                        }
+                        return new Node("function-call", insideFunCall);
+                    } else {
+                        return new Node("array-declaration", insideFunCall);
                     }
 
-                    return new Node("function-call", insideFunCall);
+
                 } else {
                     System.out.println("Ошибка! Ожидали правую скобку");
                     return null;
@@ -1050,7 +1081,7 @@ public class Parser {
     public Node param() throws Exception {
         ArrayList<Node> insideParam = new ArrayList<>();
         Node expID = id();
-        sa.addVar(expID.name);
+        if (expID != null) sa.addVar(expID.tl.getLexem().toString());
         if (lexer.getLastToken() == Token.COLON) {
             insideParam.add(expID);
             insideParam.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
@@ -1133,6 +1164,7 @@ public class Parser {
     public Node function() throws Exception {
         ArrayList<Node> insideFunction = new ArrayList<>();
         if (lexer.getLastToken() == Token.FUNCTION) {
+            insideFunction.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
             lexer.getNextLexem();
             if (lexer.getLastToken() == Token.ID) {
                 insideFunction.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
@@ -1451,7 +1483,7 @@ public class Parser {
                 sa.removeLevel();
                 return new Node("for-block", insideForBlock);
             } else {
-                System.out.println("Ошибка! Ожидалось выражение!");
+//                System.out.println("Ошибка! Ожидалось выражение!");
                 return null;
             }
         }
@@ -1577,6 +1609,9 @@ public class Parser {
         if (exp.name == "expression") {
             if (exp.childrenNode.get(0).name == "LBR") {
                 exp = exp.childrenNode.get(1);
+            }
+            if (exp.childrenNode.get(0).name == "array-declaration") {
+                return;
             }
             if (exp.childrenNode.get(0).name == "logical-expression") {
                 vt.addVarType(newVar, "bool");

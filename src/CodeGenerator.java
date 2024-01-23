@@ -21,7 +21,7 @@ public class CodeGenerator {
                 }
             }
         }
-        return "using System; \r\n class Trans {" + res + "}";
+        return "using System; \r\nclass Trans { \r\n" +  res + "}";
     }
 
     public String statement(Node node) {
@@ -32,7 +32,11 @@ public class CodeGenerator {
                 Node nodeStatement = node.childrenNode.get(i);
                 switch (nodeStatement.name) {
                     case "declaration":
-                        res += getDeclaration(nodeStatement);
+                        if (node.childrenNode.get(i).childrenNode.get(2).childrenNode.get(0).name == "array-declaration") {
+                            res+= getArray_declaration(nodeStatement) + ";";
+                        } else {
+                            res += getDeclaration(nodeStatement);
+                        }
                         break;
                     case "function-call":
                         res += getFunction_call(nodeStatement)+";";
@@ -58,11 +62,45 @@ public class CodeGenerator {
                     case "for-statement":
                         res += getFor_statement(nodeStatement);
                         break;
-
                 }
             }
         }
         return res;
+    }
+
+    public String getArray_declaration(Node node) {
+        String code = "";
+        String type = "";
+        for (int i = 0; i < node.childrenNode.size(); i++) {
+            Node ch = node.childrenNode.get(i);
+            switch (ch.name) {
+                case "EQUALS":
+                    code += "=";
+                    break;
+                case "expression":
+                    type = getTypeArray(ch.childrenNode.get(0).childrenNode.get(2).childrenNode.get(0));
+                    code += "{ " + getActual_params(ch.childrenNode.get(0).childrenNode.get(2)) + " }";
+                    break;
+                case "simple-declaration":
+                    code += "[]" + node.childrenNode.get(0).childrenNode.get(1).tl.getLexem().toString();
+                    break;
+            }
+        }
+        return type + " " + code;
+    }
+
+    public String getTypeArray(Node node) {
+        switch(node.childrenNode.get(0).childrenNode.get(0).childrenNode.get(0).tl.token) {
+            case NUM:
+                return "float";
+            case STR:
+                return "string";
+            case CHAR:
+                return "char";
+            case TRUE, FALSE:
+                return "bool";
+        }
+        return "";
     }
 
     public String getValue(Node node) {
@@ -237,6 +275,8 @@ public class CodeGenerator {
                     break;
                 case "RBR":
                     code += ")";
+                    break;
+
             }
         }
         return code;

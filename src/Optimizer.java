@@ -44,11 +44,14 @@ public class Optimizer {
 
         if (node.name == "simple-declaration") {
             var_using.put(node.childrenNode.get(1).tl.lexema.toString(), 0);
+            return;
         }
 
         if (node.name == "ID") {
             Integer value = var_using.get(node.tl.lexema.toString());
-            var_using.put(node.tl.lexema.toString(), value + 1);
+            if (value != null) {
+                var_using.put(node.tl.lexema.toString(), value + 1);
+            }
         }
 
         if (node.childrenNode != null && node.childrenNode.size() != 0) {

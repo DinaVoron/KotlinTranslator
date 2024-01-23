@@ -1,8 +1,6 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 public enum Token {
-
-        RAWSTRING("\"\"\".*\"\"\""),
         TO("\\.\\."),
         COMMENT("/\\*.*?\\*/"),
         COMMA(","),
@@ -30,6 +28,7 @@ public enum Token {
         LSQBR("\\["),
         RSQBR("\\]"),
         COLON(":"),
+        ISNOTEQUAL("!=="),
         NOT("!"),
         AND("&&"),
         OR("\\|\\|"),
@@ -44,7 +43,6 @@ public enum Token {
         VAR("var(?!\\w+)"),
         VAL("val(?!\\w+)"),
         ISEQUAL("=="),
-        ISNOTEQUAL("!=="),
         EQUALS("="),
         IF("if(?!\\w+)"),
         ELSE ("else(?!\\w+)"),
@@ -76,6 +74,7 @@ public enum Token {
         POINT("\\."),
         ADD("add(?!\\w+)"),
         REMOVE("remove(?!\\w+)"),
+        RAWSTRING("\"\"\".*?\"\"\""),
         STR("\".*?\""),
         PRINTLN("(println)(?!\\w+)"),
         PRINT("print(?!\\w+)"),
