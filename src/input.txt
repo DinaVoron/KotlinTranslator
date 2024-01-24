@@ -1,5 +1,1 @@
-fun prin(x: Char): Char {
-    return x
-}
-var y = arrayOf('1','2','3')
-prin(y[1])
+var x = abs(3)

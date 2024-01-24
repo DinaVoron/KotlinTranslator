@@ -297,7 +297,10 @@ public class Parser {
                                                 break;
                                         }
                                     }
-                                    else if (actualParam().childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name.equals("ID")) {
+                                    else if (actualParam().childrenNode.get(i).childrenNode.get(0).childrenNode.size() == 4) {
+                                        String type = vt.getVarType(actualParam().childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString()).split(" ")[0];
+                                        fc.add(type);
+                                    } else if (actualParam().childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name.equals("ID")) {
                                         fc.add(vt.getVarType(actualParam().childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString()));
                                     }
                                 } //вот тут вот добавить про id в будущем
@@ -868,7 +871,10 @@ public class Parser {
                                             break;
                                     }
                                 }
-                                else if (expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name.equals("ID")) {
+                                else if (expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.size() == 4) {
+                                    String type = vt.getVarType(expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString()).split(" ")[0];
+                                    fc.add(type);
+                                } else if (expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name.equals("ID")) {
                                     fc.add(vt.getVarType(expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString()));
                                 }
                             } else {
