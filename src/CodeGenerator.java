@@ -67,6 +67,11 @@ public class CodeGenerator {
                     case "for-statement":
                         res += getFor_statement(nodeStatement);
                         break;
+                    case "in-function-call":
+                        res += getInFunction_call(nodeStatement);
+                        break;
+                    case "math-function-call":
+                        res += getMathFunction_call(nodeStatement);
                 }
             }
         }
@@ -346,6 +351,87 @@ public class CodeGenerator {
         }
         return code;
     }
+    public String getMathFunction_call(Node node) {
+        String code = "";
+        for (int i = 0; i < node.childrenNode.size(); i++) {
+            Node nodeIns = node.childrenNode.get(i);
+            switch (nodeIns.name) {
+                case "ABS":
+                    code += "Math.Abs";
+                    break;
+                case "CEIL":
+                    code += "Math.Ceiling";
+                    break;
+                case "FLOOR":
+                    code += "Math.Floor";
+                    break;
+                case "MAX":
+                    code += "Math.Max";
+                    break;
+                case "MIN":
+                    code += "Math.Min";
+                    break;
+                case "ROUND":
+                    code += "Math.Round";
+                    break;
+                case "SQRT":
+                    code += "Math.Sqrt";
+                    break;
+                case "CBRT":
+                    code += "Math.Cbrt";
+                    break;
+                case "EXP":
+                    code += "Math.Exp";
+                    break;
+                case "LOG":
+                    code += "Math.Log";
+                    break;
+                case "POW":
+                    code += "Math.Pow";
+                    break;
+                case "SIGN":
+                    code += "Math.Sign";
+                    break;
+                case"LBR", "RBR":
+                    code += nodeIns.tl.getLexem().toString();
+                    break;
+                case "actual-params":
+                    code += getActual_params(nodeIns);
+                    break;
+                default:
+                    code += nodeIns.tl.getLexem().toString();
+                    break;
+            }
+        }
+        return code;
+    }
+    public String getInFunction_call(Node node) {
+        String code = "";
+        for (int i = 0; i < node.childrenNode.size(); i++) {
+            Node nodeIns = node.childrenNode.get(i);
+            switch (nodeIns.name) {
+                case "PRINT":
+                    code += "Console.Write";
+                    break;
+                case "PRINTLN":
+                    code += "Console.WriteLine";
+                    break;
+                case "READLINE":
+                    code += "Console.ReadLine";
+                    break;
+                case"LBR", "RBR":
+                    code += nodeIns.tl.getLexem().toString();
+                    break;
+                case "actual-params":
+                    code += getActual_params(nodeIns);
+                    break;
+                default:
+                    code += nodeIns.tl.getLexem().toString();
+                    break;
+            }
+        }
+        return code;
+    }
     public String getTerm(Node node) {
         String code = "";
         for (int i = 0; i < node.childrenNode.size(); i++) {
@@ -371,6 +457,9 @@ public class CodeGenerator {
                     break;
                 case "function-call":
                     code += getFunction_call(nodeIns);
+                    break;
+                case "math-function-call":
+                    code += getMathFunction_call(nodeIns);
             }
         }
         return code;
