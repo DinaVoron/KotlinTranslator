@@ -708,6 +708,10 @@ public class Parser {
                 }
             case ARRAYOF:
                 Node expFun = function_call();
+                if (expFun == null) {
+                    System.out.println("Ожидалось объявление массива");
+                    return null;
+                }
                 ArrayList<Node> expInside = new ArrayList<>();
                 expInside.add(expFun);
                 return(new Node("expression", expInside));
@@ -817,6 +821,8 @@ public class Parser {
                                     }
                                 }
                                 else if (expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name.equals("ID")) {
+                                    fc.add(vt.getVarType(expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString()));
+                                } else if (expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).name.equals("term")) {
                                     fc.add(vt.getVarType(expActParams.childrenNode.get(i).childrenNode.get(0).childrenNode.get(0).tl.getLexem().toString()));
                                 }
                             } else {
@@ -1611,6 +1617,24 @@ public class Parser {
                 exp = exp.childrenNode.get(1);
             }
             if (exp.childrenNode.get(0).name == "array-declaration") {
+                String type = "";
+                exp = exp.childrenNode.get(0).childrenNode.get(2).childrenNode.get(0).childrenNode.get(0);
+                String val = exp.childrenNode.get(0).childrenNode.get(0).tl.getToken().toString();
+                switch (val) {
+                    case "STR":
+                        type = "str array";
+                        break;
+                    case "CHAR":
+                        type = "char array";
+                        break;
+                    case "TRUE", "FALSE":
+                        type = "bool array";
+                        break;
+                    case "NUM":
+                        type = "num array";
+                        break;
+                }
+                vt.addVarType(newVar, type);
                 return;
             }
             if (exp.childrenNode.get(0).name == "logical-expression") {
@@ -1682,6 +1706,10 @@ public class Parser {
                                 break;
                         }
                         break;
+                }
+            } else {
+                if (exp.childrenNode.size() == 4) {
+                    vt.addVarType(newVar, vt.getVarType(exp.childrenNode.get(0).tl.getLexem().toString()).split(" ")[0]);
                 }
             }
         }
