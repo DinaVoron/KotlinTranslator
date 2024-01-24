@@ -1,5 +1,5 @@
-fun prin(x: Char): Char{
-return x
+fun prin(x: Char): Char {
+    return x
 }
-var y = arrayOf(1,2,3)
+var y = arrayOf('1','2','3')
 prin(y[1])
