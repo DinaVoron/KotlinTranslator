@@ -1,3 +1,5 @@
-var x = arrayOf(1, 2, 3)
-var y = x[1]
-y = y + 1
+fun prin(x: Char): Char{
+return x
+}
+var y = arrayOf(1,2,3)
+prin(y[1])

@@ -1,5 +1,7 @@
 public class CodeGenerator {
 
+    public String functions = "";
+
     public String generate(Node node) {
         String res = "";
         if (node == null) {
@@ -14,14 +16,17 @@ public class CodeGenerator {
                         res += statement(nodeStatement);
                         break;
                     case "EOL":
-                        res += "\n";
+                        res += "\r\n";
                         break;
                     case "COMMENT":
                         res += getComment(nodeStatement);
                 }
             }
         }
-        return "using System; \r\nclass Trans { \r\n" +  res + "}";
+        return "using System; \r\nclass Trans { \r\n"
+                + functions
+                + "static void Main() { \r\n \r\n"
+                +  res + "\r\n}\r\n}" ;
     }
 
     public String statement(Node node) {
@@ -42,7 +47,7 @@ public class CodeGenerator {
                         res += getFunction_call(nodeStatement)+";";
                         break;
                     case "function-construction":
-                        res += getFunction_construction(nodeStatement);
+                        functions += getFunction_construction(nodeStatement) + "\r\n";
                         break;
                     case "assigning":
                         res += getAssigning(nodeStatement)+";";
@@ -470,9 +475,9 @@ public class CodeGenerator {
                                 code += "const " + type + " ";
                             }
                         }
-                        else code += "var ";
+                        else code += "dynamic ";
                     }
-                    else code += "var ";
+                    else code += "dynamic ";
                     code += nodeIns.childrenNode.get(1).tl.getLexem().toString()+" ";
                     break;
                 case "EQUALS" :
@@ -843,7 +848,7 @@ public class CodeGenerator {
                         i += 2;
                         nodeIns = node.childrenNode.get(i);
                         String num2 = nodeIns.tl.getLexem().toString();
-                        code += "var " + id + " in " + num2;
+                        code += "dynamic " + id + " in " + num2;
                         break;
                     }
             }
