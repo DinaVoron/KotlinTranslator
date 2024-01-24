@@ -248,6 +248,7 @@ public class Parser {
 //                        return null;
 //                }
 
+
             case ID:
                 if (!sa.checkVariable(lexer.getLastLexem().toString())) {
                     throw new Exception();
@@ -527,7 +528,7 @@ public class Parser {
                 }
                 insideExpressionInside.add(expTermAfterNot);
                 return new Node("logical-expression", insideExpressionInside);
-            case ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN:
+            case ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN, SIN, COS:
                 Node expFun = function_call();
                 ArrayList<Node> insTerm = new ArrayList<>();
                 insTerm.add(expFun);
@@ -733,7 +734,7 @@ public class Parser {
                     return new Node("expression", arrL);
                 }
 
-            case ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN:
+            case ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN, SIN, COS:
                 Node expExp = expression_inside();
                 ArrayList<Node> expInside1 = new ArrayList<>();
                 expInside1.add(expExp);
@@ -827,7 +828,7 @@ public class Parser {
                 id = "ARRAYOF";
                 insideFunCall.add(new Node("ARRAYOF", new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                 break;
-            case PRINT, PRINTLN, ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN, READLINE:
+            case PRINT, PRINTLN, ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN, READLINE, SIN, COS:
                 id = lexer.getLastToken().toString();
                 insideFunCall.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                 break;
@@ -900,7 +901,8 @@ public class Parser {
 
                     } else if (id == "ABS" || id == "CEIL" || id == "FLOOR"
                             || id == "ROUND" || id == "SQRT" || id == "CBRT"
-                            || id == "EXP" || id == "LOG" || id == "POW" || id == "SIGN") {
+                            || id == "EXP" || id == "LOG" || id == "POW"
+                            || id == "SIGN" || id == "COS" || id == "SIN") {
                         if (fc.size() != 1 || fc.get(0) != "num") {
                             System.out.println("Ошибка! Функция вызвана не с теми параметрами!");
                             return null;

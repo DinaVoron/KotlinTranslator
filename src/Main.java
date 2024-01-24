@@ -23,6 +23,7 @@ public class Main {
 
         System.out.println(parser.getVarTypes());
         CodeGenerator cg = new CodeGenerator();
+        System.out.println(cg.generate(parser.program));
         Optimizer opt = new Optimizer(parser.program);
         Node newNode = opt.optimize();
         System.out.println(cg.generate(newNode));
