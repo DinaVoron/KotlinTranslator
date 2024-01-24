@@ -524,6 +524,29 @@ public class Parser {
                 }
                 insideExpressionInside.add(expTermAfterNot);
                 return new Node("logical-expression", insideExpressionInside);
+            case ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN:
+                Node expFun = function_call();
+                ArrayList<Node> insTerm = new ArrayList<>();
+                insTerm.add(expFun);
+                Node term = new Node("term", insTerm);
+                ArrayList<Node> expInside = new ArrayList<>();
+                expInside.add(term);
+                Node expSign1 = sign();
+                if (expSign1 != null) {
+                    expInside.add(expSign1);
+                    Node expIns = expression_inside();
+                    if (expIns == null) {
+                        System.out.println("Ошибка! Ожидалось выражение!");
+                        return null;
+                    }
+                    expInside.add(expIns);
+                    Node expExp = expressionInside_();
+                    if (expExp != null) {
+                        expInside.add(expExp);
+                    }
+                }
+                return (new Node("expression-inside", expInside));
+
             default:
                 Node expTerm = term();
                 if (expTerm == null) {
@@ -706,11 +729,36 @@ public class Parser {
                     arrL.add(logExp);
                     return new Node("expression", arrL);
                 }
+
+            case ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN:
+                Node expExp = expression_inside();
+                ArrayList<Node> expInside1 = new ArrayList<>();
+                expInside1.add(expExp);
+                return (new Node("expression", expInside1));
             case ARRAYOF:
                 Node expFun = function_call();
+                if (expFun == null) {
+                    System.out.println("Ожидалось объявление масиива");
+                    return null;
+                }
                 ArrayList<Node> expInside = new ArrayList<>();
                 expInside.add(expFun);
                 return(new Node("expression", expInside));
+//                Node expSign = sign();
+//                if (expSign != null) {
+//                    expInside.add(expSign);
+//                    Node expIns = expression_inside();
+//                    if (expIns == null) {
+//                        System.out.println("Ошибка! Ожидалось выражение!");
+//                        return null;
+//                    }
+//                    expInside.add(expIns);
+//                    Node expExp = expressionInside_();
+//                    if (expExp != null) {
+//                        expInside.add(expExp);
+//                    }
+//                }
+//                return (new Node("expression", expInside));
             default:
                 Node expInsExp1 = expression_inside();
 
@@ -776,6 +824,10 @@ public class Parser {
                 id = "ARRAYOF";
                 insideFunCall.add(new Node("ARRAYOF", new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                 break;
+            case PRINT, PRINTLN, ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN, READLINE:
+                id = lexer.getLastToken().toString();
+                insideFunCall.add(new Node(lexer.getLastToken().toString(), new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
+                break;
             default:
                 insideFunCall.add(new Node("ID", new TokenLexem(lexer.getLastLexem(), lexer.getLastToken())));
                 break;
@@ -827,15 +879,41 @@ public class Parser {
                             }
                         }
                     }
+                    if (id == "ARRAYOF") {
+                        return new Node("array-declaration", insideFunCall);
+                    }
+                    else if (id == "READLINE") {
+                        if (fc.size() != 0) {
+                            System.out.println("Ошибка! Функция вызвана не с теми параметрами!");
+                            return null;
+                        }
+                        return new Node("in-function-call", insideFunCall);
+                    }
+                    else if (id == "PRINT" || id == "PRINTLN") {
+                        return new Node("in-function-call", insideFunCall);
 
-                    if (id != "ARRAYOF") {
+                    } else if (id == "ABS" || id == "CEIL" || id == "FLOOR"
+                            || id == "ROUND" || id == "SQRT" || id == "CBRT"
+                            || id == "EXP" || id == "LOG" || id == "POW" || id == "SIGN") {
+                        if (fc.size() != 1 || fc.get(0) != "num") {
+                            System.out.println("Ошибка! Функция вызвана не с теми параметрами!");
+                            return null;
+                        }
+                        return new Node("math-function-call", insideFunCall);
+                    }
+                        else if (id == "MAX" || id == "MIN"){
+                            if (fc.size() != 2 || fc.get(0) != "num" || fc.get(1) != "num") {
+                                System.out.println("Ошибка! Функция вызвана не с теми параметрами!");
+                                return null;
+                            }
+                        return new Node("math-function-call", insideFunCall);
+                    }
+                    else {
                         if (!sa.checkFun(id, fc)) {
                             System.out.println("Ошибка! Функция вызвана не с теми параметрами!");
                             return null;
                         }
                         return new Node("function-call", insideFunCall);
-                    } else {
-                        return new Node("array-declaration", insideFunCall);
                     }
 
 
@@ -1611,8 +1689,33 @@ public class Parser {
                 exp = exp.childrenNode.get(1);
             }
             if (exp.childrenNode.get(0).name == "array-declaration") {
+                String type = "";
+                exp = exp.childrenNode.get(0).childrenNode.get(2).childrenNode.get(0).childrenNode.get(0);
+                String val = exp.childrenNode.get(0).childrenNode.get(0).tl.getToken().toString();
+                switch (val) {
+                    case "STR":
+                        type = "str array";
+                        break;
+                    case "CHAR":
+                        type = "char array";
+                        break;
+                    case "TRUE", "FALSE":
+                        type = "bool array";
+                        break;
+                    case "NUM":
+                        type = "num array";
+                        break;
+                }
+                vt.addVarType(newVar, type);
                 return;
             }
+//            if (exp.childrenNode.get(1).name == "expression-inside") {
+//                vt.addVarType(newVar, "num");
+//                return;
+//            }
+//            if (exp.childrenNode.get(0).name == "math-function-call") {
+//                return;
+//            }
             if (exp.childrenNode.get(0).name == "logical-expression") {
                 vt.addVarType(newVar, "bool");
             }
@@ -1669,6 +1772,9 @@ public class Parser {
                     case "ID":
                         vt.addVarType(newVar, vt.getVarType(exp.childrenNode.get(0).tl.getLexem().toString()));
                         break;
+                    case "math-function-call":
+                        vt.addVarType(newVar, "num");
+                        break;
                     case "function-call":
                         vt.addVarType(newVar, vt.getFunType(exp.childrenNode.get(0).tl.getLexem().toString()));
                         break;
@@ -1683,7 +1789,11 @@ public class Parser {
                         }
                         break;
                 }
+            } else {
+            if (exp.childrenNode.size() == 4) {
+                vt.addVarType(newVar, vt.getVarType(exp.childrenNode.get(0).tl.getLexem().toString()).split(" ")[0]);
             }
+        }
         }
     }
 
@@ -1747,7 +1857,8 @@ public class Parser {
                     insideStatement.add(declaration);
                     return new Node("statement", insideStatement);
                 }
-            case ID, ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN, PRINT, PRINTLN, READLINE, ARRAYOF, LISTOF: //
+
+            case ID, ABS, CEIL, FLOOR, MAX, MIN, ROUND, SQRT, CBRT, EXP, LOG, POW, SIGN, READLINE, ARRAYOF, LISTOF, PRINT, PRINTLN: //
                 Node expFunCall = function_call();
                 if (expFunCall == null) {
                     System.out.println("Ошибка! Ожидался вызов функции!");
