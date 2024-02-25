@@ -901,7 +901,7 @@ public class Parser {
 
                     } else if (id == "ABS" || id == "CEIL" || id == "FLOOR"
                             || id == "ROUND" || id == "SQRT" || id == "CBRT"
-                            || id == "EXP" || id == "LOG" || id == "POW"
+                            || id == "EXP" || id == "LOG"
                             || id == "SIGN" || id == "COS" || id == "SIN") {
                         if (fc.size() != 1 || fc.get(0) != "num") {
                             System.out.println("Ошибка! Функция вызвана не с теми параметрами!");
@@ -909,7 +909,7 @@ public class Parser {
                         }
                         return new Node("math-function-call", insideFunCall);
                     }
-                        else if (id == "MAX" || id == "MIN"){
+                        else if (id == "MAX" || id == "MIN" || id == "POW"){
                             if (fc.size() != 2 || fc.get(0) != "num" || fc.get(1) != "num") {
                                 System.out.println("Ошибка! Функция вызвана не с теми параметрами!");
                                 return null;

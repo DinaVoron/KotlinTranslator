@@ -1,2 +1,22 @@
-var y = sin(0.2)
-var x = cos(0.2)
+fun checkNum(num: Float) {
+  if (num <= 0) {
+     println("Число не положительное")
+  } else {
+    println(num * 20 / 100)
+  }
+}
+
+var x = arrayOf(0, 2, 20)
+
+
+var z = 3
+for (i in x) {
+    z = z + i
+}
+
+/* kjdfkjdfkjfdjk
+43887uieiu fhfs
+dfkjdfkjdfjks */
+
+var hh = 999
+

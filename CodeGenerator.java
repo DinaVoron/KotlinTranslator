@@ -870,9 +870,6 @@ public class CodeGenerator {
                 case "return-statement":
                     code += getReturn(nodeIns)+ ";";
                     break;
-                case "for-statement":
-                    code += getFor_statement(nodeIns);
-                    break;
                 case "CONTINUE", "BREAK":
                     code += nodeIns.tl.getLexem().toString()+";";
                     break;
